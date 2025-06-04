@@ -51,13 +51,15 @@ export class BooksController {
   }
 
   @Patch(':id')
+  @UseInterceptors(FileInterceptor('image'))
   update(
     @Param('id') id: string,
     @Body() updateBookDto: UpdateBookDto,
     @Request() req: AuthenticatedRequest,
+    @UploadedFile() image?: Express.Multer.File,
   ) {
     const userId = req.user.id;
-    return this.booksService.update(id, updateBookDto, userId);
+    return this.booksService.update(id, updateBookDto, userId, image);
   }
 
   @Delete(':id')

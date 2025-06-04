@@ -10,20 +10,12 @@ import { SupabaseService } from '../supabase/supabase.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from './entities/user.entity';
+import { RegisterResponseDto, LoginResponseDto } from './dto/auth-response.dto';
 
 type SupabaseResponse<T> = {
   data: T | null;
   error: { message: string } | null;
 };
-
-interface AuthResponse {
-  message?: string;
-  accessToken?: string;
-  user: {
-    id: string;
-    email: string;
-  };
-}
 
 interface JwtPayload {
   sub: string;
@@ -37,7 +29,7 @@ export class UsersService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(registerDto: RegisterDto): Promise<AuthResponse> {
+  async register(registerDto: RegisterDto): Promise<RegisterResponseDto> {
     const { email, password } = registerDto;
 
     const result = (await this.supabaseService.findUserByEmail(
@@ -73,7 +65,7 @@ export class UsersService {
     };
   }
 
-  async login(loginDto: LoginDto): Promise<AuthResponse> {
+  async login(loginDto: LoginDto): Promise<LoginResponseDto> {
     const { email, password } = loginDto;
 
     const result = (await this.supabaseService.findUserByEmail(

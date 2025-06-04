@@ -93,10 +93,34 @@ export class BooksService {
     id: string,
     updateBookDto: UpdateBookDto,
     userId: string,
+    image?: Express.Multer.File,
   ): Promise<Book> {
+    // First verify the book exists and belongs to the user
     await this.findOne(id, userId);
 
-    const result = await this.supabaseService.updateBook(id, updateBookDto);
+    let coverImageURL: string | undefined = undefined;
+
+    // Handle image upload if a new image is provided
+    if (image) {
+      const uploadResult = await this.supabaseService.uploadImage(
+        image,
+        `books/${Date.now()}-${image.originalname}`,
+      );
+
+      if (uploadResult.error) {
+        throw new BadRequestException(
+          `Image upload failed: ${uploadResult.error.message}`,
+        );
+      }
+
+      coverImageURL = uploadResult.data?.publicUrl;
+    }
+
+    // Update the book with new data including image if provided
+    const result = await this.supabaseService.updateBook(id, {
+      ...updateBookDto,
+      ...(coverImageURL && { coverImageURL }),
+    });
 
     if (result.error) {
       throw new BadRequestException(
